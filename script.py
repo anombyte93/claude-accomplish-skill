@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-DAILY_DIR = Path.home() / "Hermes" / "Daily_Accomplishments"
+DAILY_DIR = Path.home() / ".claude" / "accomplishments"
 
 
 def _out(data):
@@ -25,27 +25,24 @@ def _run(cmd, cwd=None):
 
 def cmd_gather_context(args):
     """Gather all context needed for building an accomplishment entry."""
-    # Date/time in AEDT
+    # Date/time in local timezone
     date_file = _run(["date", "+%-d-%b-%y"], cwd=None)
     timestamp = _run(["date", "+%H:%M"], cwd=None)
-
-    # Override with AEDT
-    date_file = _run(["env", "TZ=Australia/Sydney", "date", "+%-d-%b-%y"])
-    timestamp = _run(["env", "TZ=Australia/Sydney", "date", "+%H:%M"])
 
     # Git context
     git_log = _run(["git", "log", "--oneline", "-10"])
     git_diff = _run(["git", "diff", "--stat", "HEAD~5..HEAD"])
 
-    # Daily file
-    daily_path = DAILY_DIR / f"{date_file}.md"
+    # Daily file (use --daily-dir override if provided, else default)
+    daily_dir = Path(args.daily_dir) if args.daily_dir else DAILY_DIR
+    daily_path = daily_dir / f"{date_file}.md"
     daily_exists = daily_path.exists()
 
     # Session context - search order
     session_context_path = None
+    project_dir = Path(args.project_dir) if args.project_dir else Path.cwd()
     candidates = [
-        Path.cwd() / "session-context" / "CLAUDE-activeContext.md",
-        Path.home() / "Hermes" / "chris" / "session-context" / "CLAUDE-activeContext.md",
+        project_dir / "session-context" / "CLAUDE-activeContext.md",
     ]
     for c in candidates:
         if c.exists():
@@ -145,7 +142,9 @@ def main():
     sub = parser.add_subparsers(dest="command")
 
     # gather-context
-    sub.add_parser("gather-context", help="Get date, time, git context, file paths")
+    p_gather = sub.add_parser("gather-context", help="Get date, time, git context, file paths")
+    p_gather.add_argument("--daily-dir", help="Override default accomplishments directory")
+    p_gather.add_argument("--project-dir", help="Override project directory for session-context lookup")
 
     # write-entry
     p_write = sub.add_parser("write-entry", help="Write/append entry to daily file")
