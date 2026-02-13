@@ -1,6 +1,6 @@
 ---
 name: accomplish
-description: Log an accomplishment to Daily_Accomplishments and session-context. Use when the user wants to record a win, milestone, or personal achievement.
+description: Log an accomplishment to daily accomplishments and session-context. Use when the user wants to record a win, milestone, or personal achievement.
 triggers:
   - "/accomplish"
   - "log accomplishment"
@@ -51,7 +51,7 @@ Returns JSON with: `date_file`, `timestamp`, `daily_path`, `daily_exists`, `sess
 Using `ACCOMPLISHMENT_TEXT`, `git_log`, `git_diff`, and session context, craft:
 
 ```markdown
-### TIMESTAMP AEDT
+### TIMESTAMP
 
 **What**: Brief title (from ACCOMPLISHMENT_TEXT)
 **Context**: Why this matters — connect to user's journey, business goals, or growth
@@ -78,14 +78,14 @@ Only if `session_context_path` was found:
 ```bash
 python3 ~/.claude/skills/accomplish/script.py write-mirror \
   --file "SESSION_CONTEXT_PATH" \
-  --line "**TIMESTAMP AEDT** - One-liner summary"
+  --line "**TIMESTAMP** - One-liner summary"
 ```
 
 ### STEP 6 — Confirm
 
 Output briefly:
 ```
-Logged to ~/Hermes/Daily_Accomplishments/DATE_FILE.md
+Logged to ~/.claude/accomplishments/DATE_FILE.md
 Mirrored to session-context/CLAUDE-activeContext.md
 ```
 
@@ -93,7 +93,7 @@ Mirrored to session-context/CLAUDE-activeContext.md
 
 - NEVER skip the timestamp
 - NEVER overwrite existing entries — always APPEND
-- Daily_Accomplishments lives at `~/Hermes/Daily_Accomplishments/` (FIXED)
+- Default accomplishments directory: `~/.claude/accomplishments/`
 - Session context mirroring is per-project (wherever `session-context/` lives relative to cwd)
 
 ## Script Reference
@@ -102,6 +102,6 @@ All commands output JSON. Run from any directory.
 
 | Command | Purpose |
 |---------|---------|
-| `gather-context` | Get date/time (AEDT), git log/diff, file paths and existence flags |
+| `gather-context [--daily-dir DIR] [--project-dir DIR]` | Get date/time (local timezone), git log/diff, file paths and existence flags |
 | `write-entry --file PATH --entry TEXT [--create]` | Write/append formatted entry to daily file |
 | `write-mirror --file PATH --line TEXT` | Append one-liner to Accomplishments section in session-context |
