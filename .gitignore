@@ -20,6 +20,9 @@ __pycache__/
 *.tmp
 *.bak
 
+# Development artifacts
+SKILL.md.pre-codify
+
 # Publishing/Development files (not needed in public repo)
 YOUR_NEXT_STEPS.md
 PUBLISHING_GUIDE.md
